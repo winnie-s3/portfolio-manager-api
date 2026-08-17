@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="PortfolioManager.Api.Tests/PortfolioManager.Api.Tests.csproj" Id="b073869e-779a-4c68-bedc-9cffe1d97171" />
+  <Project Path="PortfolioManager.Api/PortfolioManager.Api.csproj" />
+</Solution>

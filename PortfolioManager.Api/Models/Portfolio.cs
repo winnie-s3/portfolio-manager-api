@@ -6,6 +6,8 @@ public class Portfolio
 
     public string Name { get; set; } = string.Empty;
 
+    public string InvestorName { get; set; } = string.Empty;
+
     public decimal InitialBalance { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
@@ -13,4 +15,6 @@ public class Portfolio
     public int UserId { get; set; }
 
     public User User { get; set; } = null!;
+
+    public List<Asset> Assets { get; set; } = [];
 }

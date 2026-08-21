@@ -8,6 +8,7 @@ using PortfolioManager.Api.Services;
 using System.Text;
 using PortfolioManager.Api.Integrations.MarketData;
 using PortfolioManager.Api.Integrations.MarketData.Brapi;
+using PortfolioManager.Api.Exceptions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -94,7 +95,11 @@ builder.Services.AddSwaggerGen(options =>
         });
 });
 
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
 var app = builder.Build();
+app.UseExceptionHandler();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

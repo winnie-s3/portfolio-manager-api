@@ -6,6 +6,8 @@ using PortfolioManager.Api.Configuration;
 using PortfolioManager.Api.Data;
 using PortfolioManager.Api.Services;
 using System.Text;
+using PortfolioManager.Api.Integrations.MarketData;
+using PortfolioManager.Api.Integrations.MarketData.Brapi;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -62,6 +64,12 @@ builder.Services
 builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddAuthorization();
+
+builder.Services.AddHttpClient<IMarketDataProvider, BrapiMarketDataProvider>(client =>
+{
+    client.BaseAddress = new Uri("https://brapi.dev/api/");
+    client.Timeout = TimeSpan.FromSeconds(10);
+});
 
 // Add services to the container.
 

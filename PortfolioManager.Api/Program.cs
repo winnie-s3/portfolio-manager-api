@@ -64,6 +64,8 @@ builder.Services
 
 builder.Services.AddScoped<IUserService, UserService>();
 
+builder.Services.AddScoped<IInvestmentTransactionService, InvestmentTransactionService>();
+
 builder.Services.AddAuthorization();
 
 builder.Services.AddHttpClient<IMarketDataProvider, BrapiMarketDataProvider>(client =>

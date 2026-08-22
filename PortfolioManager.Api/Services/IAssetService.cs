@@ -7,15 +7,27 @@ public interface IAssetService
     Task<List<Asset>> GetAllAsync(
     int page,
     int pageSize,
-    string? search);
+    string? search,
+    int userId);
 
-    Task<Asset?> GetByIdAsync(int id);
+    Task<int> CountAsync(
+        string? search,
+        int userId);
 
-    Task<List<Asset>> GetByPortfolioIdAsync(int portfolioId);
+    Task<Asset?> GetByIdAsync(
+    int id,
+    int userId);
 
-    Task<Asset?> CreateAsync(Asset asset);
+    Task<List<Asset>> GetByPortfolioIdAsync(
+    int portfolioId,
+    int userId);
 
-    Task<bool> DeleteAsync(int id);
-    Task<(Asset? Asset, bool PortfolioExists)> UpdateAsync(int id, Asset asset);
-    Task<int> CountAsync(string? search);
+    Task<Asset?> CreateAsync(
+    Asset asset,
+    int userId);
+
+    Task<(Asset? Asset, bool PortfolioExists)> UpdateAsync(
+    int id,
+    Asset asset,
+    int userId);
 }

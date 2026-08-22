@@ -8,19 +8,42 @@ namespace PortfolioManager.Api.Integrations.MarketData.Brapi;
 public class BrapiMarketDataProvider : IMarketDataProvider
 {
     private readonly HttpClient _httpClient;
+    private readonly ILogger<BrapiMarketDataProvider> _logger;
 
-    public BrapiMarketDataProvider(HttpClient httpClient)
+    public BrapiMarketDataProvider(
+        HttpClient httpClient,
+        ILogger<BrapiMarketDataProvider> logger)
     {
         _httpClient = httpClient;
+        _logger = logger;
     }
 
     public async Task<AssetPrice?> GetPriceAsync(
     string symbol,
     CancellationToken cancellationToken = default)
     {
+        _logger.LogInformation(
+        "Fetching market price for asset {Symbol} using Brapi.",
+        symbol);
+
         var response = await _httpClient.GetAsync(
             $"quote/{symbol}",
             cancellationToken);
+
+        if (response.IsSuccessStatusCode)
+        {
+            _logger.LogInformation(
+                "Brapi returned status code {StatusCode} for asset {Symbol}.",
+                (int)response.StatusCode,
+                symbol);
+        }
+        else
+        {
+            _logger.LogWarning(
+                "Brapi returned non-success status code {StatusCode} for asset {Symbol}.",
+                (int)response.StatusCode,
+                symbol);
+        }
 
         if (response.StatusCode == HttpStatusCode.NotFound)
             return null;

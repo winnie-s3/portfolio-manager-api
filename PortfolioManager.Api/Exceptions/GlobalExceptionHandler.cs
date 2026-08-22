@@ -24,6 +24,20 @@ public class GlobalExceptionHandler : IExceptionHandler
 
         var problemDetails = exception switch
         {
+            ResourceNotFoundException => new ProblemDetails
+            {
+                Status = StatusCodes.Status404NotFound,
+                Title = "Resource not found",
+                Detail = exception.Message
+            },
+
+            ForbiddenAccessException => new ProblemDetails
+            {
+                Status = StatusCodes.Status403Forbidden,
+                Title = "Forbidden",
+                Detail = exception.Message
+            },
+
             ExternalServiceException => new ProblemDetails
             {
                 Status = StatusCodes.Status502BadGateway,

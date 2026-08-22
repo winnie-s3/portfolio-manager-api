@@ -3,6 +3,7 @@ using PortfolioManager.Api.Dtos;
 using PortfolioManager.Api.Mappings;
 using PortfolioManager.Api.Services;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace PortfolioManager.Api.Controllers;
 
@@ -30,9 +31,21 @@ public class AssetsController : ControllerBase
         if (pageSize < 1 || pageSize > 100)
             return BadRequest("O tamanho da página deve estar entre 1 e 100.");
 
-        var assets = await _assetService.GetAllAsync(page, pageSize, search);
+        var userIdClaim =
+            User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        var totalItems = await _assetService.CountAsync(search);
+        if (!int.TryParse(userIdClaim, out var userId))
+            return Unauthorized();
+
+        var assets = await _assetService.GetAllAsync(
+            page,
+            pageSize,
+            search,
+            userId);
+
+        var totalItems = await _assetService.CountAsync(
+            search,
+            userId);
 
         var response = new PagedResponse<AssetDto>
         {
@@ -43,7 +56,8 @@ public class AssetsController : ControllerBase
             CurrentPage = page,
             PageSize = pageSize,
             TotalItems = totalItems,
-            TotalPages = (int)Math.Ceiling((double)totalItems / pageSize)
+            TotalPages = (int)Math.Ceiling(
+                (double)totalItems / pageSize)
         };
 
         return Ok(response);
@@ -52,7 +66,13 @@ public class AssetsController : ControllerBase
     [HttpGet("{id:int}")]
     public async Task<ActionResult<AssetDto>> GetById(int id)
     {
-        var asset = await _assetService.GetByIdAsync(id);
+        var userIdClaim =
+            User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (!int.TryParse(userIdClaim, out var userId))
+            return Unauthorized();
+
+        var asset = await _assetService.GetByIdAsync(id, userId);
 
         if (asset is null)
             return NotFound();
@@ -62,10 +82,18 @@ public class AssetsController : ControllerBase
 
     [HttpGet("portfolio/{portfolioId:int}")]
     public async Task<ActionResult<List<AssetDto>>> GetByPortfolio(
-        int portfolioId)
+    int portfolioId)
     {
+        var userIdClaim =
+            User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (!int.TryParse(userIdClaim, out var userId))
+            return Unauthorized();
+
         var assets =
-            await _assetService.GetByPortfolioIdAsync(portfolioId);
+            await _assetService.GetByPortfolioIdAsync(
+                portfolioId,
+                userId);
 
         var response = assets
             .Select(AssetMapper.ToDto)
@@ -76,11 +104,18 @@ public class AssetsController : ControllerBase
 
     [HttpPost]
     public async Task<ActionResult<AssetDto>> Create(
-        CreateAssetDto request)
+    CreateAssetDto request)
     {
+        var userIdClaim =
+            User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (!int.TryParse(userIdClaim, out var userId))
+            return Unauthorized();
+
         var asset = AssetMapper.ToEntity(request);
 
-        var createdAsset = await _assetService.CreateAsync(asset);
+        var createdAsset =
+            await _assetService.CreateAsync(asset, userId);
 
         if (createdAsset is null)
         {
@@ -96,25 +131,23 @@ public class AssetsController : ControllerBase
             response);
     }
 
-    [HttpDelete("{id:int}")]
-    public async Task<IActionResult> Delete(int id)
-    {
-        var deleted = await _assetService.DeleteAsync(id);
-
-        if (!deleted)
-            return NotFound();
-
-        return NoContent();
-    }
-
     [HttpPut("{id:int}")]
     public async Task<ActionResult<AssetDto>> Update(
     int id,
     UpdateAssetDto request)
     {
+        var userIdClaim =
+            User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (!int.TryParse(userIdClaim, out var userId))
+            return Unauthorized();
+
         var asset = AssetMapper.ToEntity(request);
 
-        var result = await _assetService.UpdateAsync(id, asset);
+        var result = await _assetService.UpdateAsync(
+            id,
+            asset,
+            userId);
 
         if (!result.PortfolioExists)
         {
@@ -123,10 +156,7 @@ public class AssetsController : ControllerBase
         }
 
         if (result.Asset is null)
-        {
-            return NotFound(
-                $"Asset com id {id} não encontrado.");
-        }
+            return NotFound();
 
         return Ok(AssetMapper.ToDto(result.Asset));
     }

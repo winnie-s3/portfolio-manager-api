@@ -33,7 +33,7 @@ public class AssetServiceTests
         };
 
         // Act
-        var result = await service.CreateAsync(asset);
+        var result = await service.CreateAsync(asset, 1);
 
         // Assert
         Assert.Null(result);
@@ -48,7 +48,8 @@ public class AssetServiceTests
 
         var portfolio = new Portfolio
         {
-            Name = "Carteira Principal"
+            Name = "Carteira Principal",
+            UserId = 1
         };
 
         context.Portfolios.Add(portfolio);
@@ -66,7 +67,7 @@ public class AssetServiceTests
         };
 
         // Act
-        var result = await service.CreateAsync(asset);
+        var result = await service.CreateAsync(asset, 1);
 
         // Assert
         Assert.NotNull(result);
@@ -74,19 +75,5 @@ public class AssetServiceTests
         Assert.Single(context.Assets);
         Assert.Equal("PETR4", result.Symbol);
         Assert.Equal(portfolio.Id, result.PortfolioId);
-    }
-
-    [Fact]
-    public async Task DeleteAsync_ShouldReturnFalse_WhenAssetDoesNotExist()
-    {
-        // Arrange
-        await using var context = CreateContext();
-        var service = new AssetService(context);
-
-        // Act
-        var result = await service.DeleteAsync(999);
-
-        // Assert
-        Assert.False(result);
     }
 }

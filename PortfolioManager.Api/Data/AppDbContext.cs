@@ -13,4 +13,5 @@ public class AppDbContext : DbContext
     public DbSet<Portfolio> Portfolios { get; set; }
     public DbSet<Asset> Assets { get; set; }
     public DbSet<User> Users { get; set; }
+    public DbSet<InvestmentTransaction> InvestmentTransactions { get; set; }
 }

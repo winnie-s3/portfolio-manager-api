@@ -1,0 +1,129 @@
+<div class="detail-page">
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">P</div>
+
+      <div>
+        <strong>Portfolio Manager</strong>
+        <span>Investment Dashboard</span>
+      </div>
+    </div>
+
+    <a routerLink="/portfolios" class="back-link">
+      ← Minhas carteiras
+    </a>
+  </header>
+
+  <main class="content">
+
+    @if (loading()) {
+    <div class="state-card">
+      <div class="loader"></div>
+      <p>Carregando carteira...</p>
+    </div>
+    }
+
+    @if (errorMessage()) {
+    <div class="state-card error">
+      {{ errorMessage() }}
+    </div>
+    }
+
+    @if (portfolio(); as portfolio) {
+
+    <section class="hero">
+
+      <div>
+        <span class="eyebrow">CARTEIRA #{{ portfolio.id }}</span>
+
+        <h1>{{ portfolio.name }}</h1>
+
+        <p>
+          Carteira de investimentos de
+          <strong>{{ portfolio.investorName }}</strong>
+        </p>
+      </div>
+
+      <div class="portfolio-icon">
+        {{ portfolio.name.charAt(0) }}
+      </div>
+
+    </section>
+
+    <section class="financial-grid">
+
+      <article class="metric-card">
+        <span class="metric-label">Saldo inicial</span>
+
+        <strong>
+          R$ {{ portfolio.initialBalance.toFixed(2) }}
+        </strong>
+
+        <span class="metric-description">
+          Capital registrado na criação
+        </span>
+      </article>
+
+      <article class="metric-card highlight">
+        <span class="metric-label">Valor atual</span>
+
+        <strong>
+          R$ {{ portfolio.totalValue.toFixed(2) }}
+        </strong>
+
+        <span class="metric-description">
+          Valor consolidado da carteira
+        </span>
+      </article>
+
+      <article class="metric-card">
+        <span class="metric-label">Criada em</span>
+
+        <strong class="date">
+          {{ portfolio.createdAt | date:'dd/MM/yyyy' }}
+        </strong>
+
+        <span class="metric-description">
+          Data de criação da carteira
+        </span>
+      </article>
+
+    </section>
+
+    <section class="investment-section">
+
+      <div class="section-header">
+        <div>
+          <span class="eyebrow">INVESTIMENTOS</span>
+          <h2>Visão da carteira</h2>
+        </div>
+
+        <span class="coming-soon">
+          Evolução contínua
+        </span>
+      </div>
+
+      <div class="info-panel">
+
+        <div class="info-icon">↗</div>
+
+        <div>
+          <h3>Histórico de operações</h3>
+
+          <p>
+            As operações de compra e venda já são registradas pela API.
+            A visualização completa do histórico será incorporada nesta
+            área na próxima evolução do frontend.
+          </p>
+        </div>
+
+      </div>
+
+    </section>
+
+    }
+
+  </main>
+
+</div>

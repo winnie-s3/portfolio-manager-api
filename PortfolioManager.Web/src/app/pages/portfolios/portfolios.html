@@ -1,0 +1,136 @@
+<div class="dashboard">
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">P</div>
+
+      <div>
+        <strong>Portfolio Manager</strong>
+        <span>Investment Dashboard</span>
+      </div>
+    </div>
+
+    <div class="status">
+      <span class="status-dot"></span>
+      Conta protegida
+    </div>
+  </header>
+
+  <main class="content">
+
+    <section class="page-header">
+      <div>
+        <span class="eyebrow">VISÃO GERAL</span>
+        <h1>Minhas Carteiras</h1>
+
+        <p>
+          Acompanhe seus investimentos e organize seu patrimônio.
+        </p>
+      </div>
+
+      <div class="header-decoration">
+        <span>↗</span>
+      </div>
+    </section>
+
+    @if (loading()) {
+    <div class="state-card">
+      <div class="loader"></div>
+      <p>Carregando suas carteiras...</p>
+    </div>
+    }
+
+    @if (errorMessage()) {
+    <div class="state-card error">
+      {{ errorMessage() }}
+    </div>
+    }
+
+    @if (!loading() && !errorMessage() && portfolios().length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">◎</div>
+
+      <h2>Nenhuma carteira ainda</h2>
+
+      <p>
+        Quando você criar uma carteira, ela aparecerá aqui.
+      </p>
+    </div>
+    }
+
+    @if (!loading() && portfolios().length > 0) {
+
+    <section class="summary">
+      <div class="summary-item">
+        <span>Carteiras</span>
+        <strong>{{ portfolios().length }}</strong>
+      </div>
+
+      <div class="summary-item">
+        <span>Status</span>
+        <strong class="positive">Ativo</strong>
+      </div>
+    </section>
+
+    <section class="portfolio-grid">
+
+      @for (portfolio of portfolios(); track portfolio.id) {
+
+      <article class="portfolio-card">
+
+        <div class="card-header">
+          <div class="portfolio-icon">
+            {{ portfolio.name.charAt(0) }}
+          </div>
+
+          <span class="badge">Ativa</span>
+        </div>
+
+        <div class="portfolio-info">
+          <h2>{{ portfolio.name }}</h2>
+
+          <span>
+            {{ portfolio.investorName }}
+          </span>
+        </div>
+
+        <div class="financial-info">
+
+          <div>
+            <span>Saldo inicial</span>
+            <strong>R$ {{ portfolio.initialBalance }}</strong>
+          </div>
+
+          <div>
+            <span>Valor atual</span>
+            <strong class="current-value">
+              R$ {{ portfolio.totalValue }}
+            </strong>
+          </div>
+
+        </div>
+
+        <div class="card-footer">
+
+          <span class="created">
+            Carteira #{{ portfolio.id }}
+          </span>
+
+          <a [routerLink]="['/portfolios', portfolio.id]">
+            Ver detalhes
+            <span>→</span>
+          </a>
+
+        </div>
+
+      </article>
+
+      }
+
+    </section>
+
+    }
+
+  </main>
+
+</div>

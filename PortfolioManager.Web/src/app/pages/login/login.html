@@ -1,0 +1,88 @@
+<div class="login-page">
+
+  <section class="brand-panel">
+    <div class="brand-content">
+
+      <div class="brand">
+        <div class="brand-mark">P</div>
+        <span>Portfolio Manager</span>
+      </div>
+
+      <div class="hero">
+        <span class="eyebrow">INVEST SMARTER</span>
+
+        <h1>
+          Seus investimentos.<br />
+          Uma visão mais clara.
+        </h1>
+
+        <p>
+          Organize suas carteiras, acompanhe seus ativos e mantenha
+          suas decisões financeiras centralizadas em um só lugar.
+        </p>
+      </div>
+
+      <div class="brand-footer">
+        Controle • Clareza • Evolução
+      </div>
+
+    </div>
+  </section>
+
+  <section class="login-panel">
+
+    <div class="login-card">
+
+      <div class="mobile-brand">
+        <div class="brand-mark">P</div>
+        <span>Portfolio Manager</span>
+      </div>
+
+      <span class="login-label">Bem-vindo de volta</span>
+
+      <h2>Acesse sua conta</h2>
+
+      <p class="login-description">
+        Entre para visualizar suas carteiras e investimentos.
+      </p>
+
+      <form (ngSubmit)="onSubmit()">
+
+        <div class="field">
+          <label for="email">E-mail</label>
+
+          <input id="email"
+                 name="email"
+                 type="email"
+                 [(ngModel)]="email"
+                 placeholder="seu@email.com"
+                 required />
+        </div>
+
+        <div class="field">
+          <label for="password">Senha</label>
+
+          <input id="password"
+                 name="password"
+                 type="password"
+                 [(ngModel)]="password"
+                 placeholder="••••••••"
+                 required />
+        </div>
+
+        <button type="submit">
+          Entrar na plataforma
+          <span>→</span>
+        </button>
+
+      </form>
+
+      <p class="security-note">
+        Seus dados são protegidos por autenticação segura.
+      </p>
+
+    </div>
+
+  </section>
+
+</div>

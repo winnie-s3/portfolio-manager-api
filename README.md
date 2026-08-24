@@ -1,8 +1,8 @@
-# Portfolio Manager API
+# Portfolio Manager
 
-API REST desenvolvida em **C# e ASP.NET Core** para gerenciamento de carteiras de investimentos.
+Aplicação full stack para gerenciamento de carteiras de investimentos, desenvolvida com **ASP.NET Core e Angular**.
 
-O projeto nasceu como um estudo prático do ecossistema .NET moderno e está sendo evoluído para uma aplicação de investimentos mais completa, com foco em **boas práticas de backend, regras de negócio, segurança, testes e arquitetura**.
+O projeto nasceu como um estudo prático do ecossistema .NET moderno e vem sendo evoluído para explorar problemas mais próximos de aplicações reais, como **autenticação, autorização por usuário, integrações externas, tratamento de falhas, modelagem financeira e frontend consumindo APIs**.
 
 > 🚧 Projeto em desenvolvimento contínuo.
 
@@ -10,11 +10,20 @@ O projeto nasceu como um estudo prático do ecossistema .NET moderno e está sen
 
 ## Sobre o projeto
 
-O **Portfolio Manager API** permite gerenciar usuários, carteiras e ativos financeiros por meio de uma API REST.
+O **Portfolio Manager** permite que usuários autenticados gerenciem suas próprias carteiras de investimentos.
 
-A aplicação está sendo refatorada para utilizar **operações de compra e venda como fonte de verdade**, permitindo futuramente calcular posições, preço médio, custos e resultados de cada carteira de forma auditável.
+A aplicação possui frontend em Angular, backend em ASP.NET Core e persistência com Entity Framework Core.
 
-O projeto também é utilizado como laboratório técnico para aprofundamento em desenvolvimento backend e arquitetura de sistemas.
+Entre os principais objetivos técnicos do projeto estão:
+
+* isolamento de dados por usuário;
+* autenticação e autorização;
+* integração com serviços externos;
+* tratamento centralizado de erros;
+* registro de operações de investimento;
+* evolução da modelagem financeira;
+* testes automatizados;
+* separação de responsabilidades.
 
 ---
 
@@ -28,7 +37,20 @@ O projeto também é utilizado como laboratório técnico para aprofundamento em
 * LINQ
 * REST APIs
 * Dependency Injection
+* HttpClient
 * Swagger / OpenAPI
+
+### Frontend
+
+* Angular
+* TypeScript
+* HTML
+* CSS
+* Angular Router
+* HttpClient
+* Signals
+* Interceptors
+* Route Guards
 
 ### Banco de dados
 
@@ -37,9 +59,12 @@ O projeto também é utilizado como laboratório técnico para aprofundamento em
 
 ### Segurança
 
-* JWT Authentication
+* JWT
+* JWT armazenado em cookie `HttpOnly`
 * BCrypt para hash de senhas
-* .NET User Secrets para armazenamento local de secrets
+* .NET User Secrets para secrets locais
+* autorização por recurso e usuário
+* CORS configurado para o frontend
 
 ### Testes
 
@@ -58,187 +83,236 @@ O projeto também é utilizado como laboratório técnico para aprofundamento em
 
 ### Autenticação
 
-* Cadastro de usuários
-* Login
-* Hash seguro de senhas com BCrypt
-* Geração de JWT
-* Proteção de endpoints autenticados
+* cadastro de usuários;
+* login;
+* hash de senhas com BCrypt;
+* geração de JWT;
+* armazenamento do JWT em cookie `HttpOnly`;
+* validação de sessão através do backend;
+* logout;
+* proteção de endpoints autenticados.
+
+### Autorização
+
+O backend identifica o usuário através das claims do JWT e valida o acesso aos recursos.
+
+Um usuário autenticado não pode consultar ou alterar carteiras pertencentes a outro usuário.
+
+A segurança não depende apenas do frontend: as verificações são realizadas pela própria API.
 
 ### Carteiras
 
-* Criação de carteiras
-* Consulta de carteiras
-* Atualização
-* Exclusão
-* Relacionamento entre usuário e carteira
+* criação;
+* consulta;
+* atualização;
+* exclusão;
+* relacionamento com usuário;
+* filtragem das carteiras pelo usuário autenticado.
 
 ### Ativos
 
-* Cadastro de ativos
-* Consulta
-* Atualização
-* Exclusão
-* Pesquisa e paginação
+* cadastro;
+* consulta;
+* atualização;
+* pesquisa;
+* paginação;
+* validação de acesso através da carteira relacionada.
 
-### Testes
+A exclusão pública de ativos foi removida durante a evolução da modelagem para evitar a remoção indevida do histórico financeiro relacionado.
 
-Testes unitários utilizando **xUnit** e banco em memória com **EF Core InMemory**.
+### Operações de investimento
 
-Entre os cenários já testados:
+Foi iniciada a modelagem baseada em operações financeiras.
 
-* criação válida de recurso;
-* validação de relacionamentos inexistentes;
-* tentativa de exclusão de recurso inexistente.
+Atualmente existem operações com informações como:
+
+* carteira;
+* ativo;
+* tipo da operação;
+* quantidade;
+* preço unitário;
+* data da operação;
+* data de criação.
+
+O backend já permite registrar uma operação e consultar uma operação por identificador.
+
+A evolução planejada inclui histórico completo por carteira, validação de vendas, cálculo de posição e preço médio.
+
+---
+
+## Integração com dados de mercado
+
+A aplicação possui integração externa para consulta de preços de ativos.
+
+Exemplo:
+
+```text
+GET /api/market-data/PETR4
+```
+
+A integração foi isolada através de um contrato interno:
+
+```text
+IMarketDataProvider
+        │
+        ▼
+BrapiMarketDataProvider
+        │
+        ▼
+     Brapi API
+```
+
+O restante da aplicação não precisa conhecer diretamente:
+
+* URL do fornecedor;
+* estrutura específica da resposta;
+* detalhes da comunicação HTTP.
+
+A resposta externa é convertida para um modelo interno da aplicação.
+
+Isso reduz o acoplamento com o fornecedor e facilita futuras mudanças na integração.
+
+---
+
+## Tratamento de falhas
+
+A aplicação possui tratamento global de exceções.
+
+Erros conhecidos são convertidos para respostas HTTP controladas, enquanto detalhes técnicos permanecem nos logs da aplicação.
+
+Exemplos tratados:
+
+* recurso inexistente;
+* acesso proibido;
+* falha em serviço externo;
+* erros inesperados.
+
+O objetivo é evitar `try/catch` repetido nos controllers e impedir a exposição desnecessária de detalhes internos para o cliente.
 
 ---
 
 ## Arquitetura atual
 
-A aplicação utiliza separação de responsabilidades entre as principais camadas:
-
 ```text
-HTTP Request
-     │
-     ▼
-Controller
-     │
-     ▼
-Service
-     │
-     ▼
+Angular
+   │
+   ▼
+ASP.NET Core API
+   │
+   ▼
+Controllers
+   │
+   ▼
+Services
+   │
+   ├──────────────► External Integrations
+   │
+   ▼
 Entity Framework Core
-     │
-     ▼
-Database
+   │
+   ▼
+SQLite
 ```
 
-Além disso, o projeto utiliza:
+Principais áreas do backend:
 
 ```text
 Controllers/
 Services/
-DTOs/
+Dtos/
 Mappings/
 Models/
 Data/
 Configuration/
+Integrations/
 Migrations/
-Tests/
 ```
-
-### Responsabilidades
-
-**Controllers**
-
-Responsáveis pela camada HTTP, recebendo requisições e retornando respostas.
-
-**Services**
-
-Concentram regras de negócio e operações da aplicação.
-
-**DTOs**
-
-Definem os contratos de entrada e saída da API, evitando exposição direta das entidades persistidas.
-
-**Mappings**
-
-Responsáveis pela conversão entre entidades e DTOs.
-
-**Entity Framework Core**
-
-Responsável pelo acesso e persistência dos dados.
 
 ---
 
-## Estrutura do projeto
+## Algumas decisões técnicas
+
+### Por que DTOs?
+
+Para evitar que as entidades persistidas sejam utilizadas diretamente como contratos HTTP e permitir maior controle sobre entrada e saída de dados.
+
+### Por que Services?
+
+Para manter regras e comportamentos da aplicação fora dos controllers.
+
+### Por que abstrair a integração externa?
+
+O sistema precisa apenas saber que consegue consultar o preço de um ativo.
+
+Detalhes como fornecedor, URL e formato da resposta ficam isolados na implementação responsável pela integração.
+
+### Por que JWT em cookie HttpOnly?
+
+Inicialmente o frontend armazenava o JWT em `localStorage`.
+
+A autenticação foi evoluída para utilizar um cookie `HttpOnly`, evitando que o JavaScript da aplicação tenha acesso direto ao token.
+
+O navegador envia o cookie automaticamente nas requisições, enquanto a validação continua sendo responsabilidade do backend.
+
+### User Secrets e HttpOnly resolvem o mesmo problema?
+
+Não.
+
+**.NET User Secrets** protege informações privadas utilizadas pelo backend durante o desenvolvimento, como a chave usada para assinar os JWTs.
+
+**HttpOnly Cookie** protege o token entregue ao navegador, impedindo que o JavaScript da página consiga acessá-lo diretamente.
+
+### Por que verificar o proprietário do recurso?
+
+Autenticação responde:
+
+> Quem está fazendo a requisição?
+
+Autorização responde:
+
+> Esse usuário pode acessar este recurso?
+
+Por isso, apenas utilizar `[Authorize]` não é suficiente para garantir isolamento entre usuários.
+
+---
+
+## Frontend Angular
+
+O frontend oferece atualmente:
+
+* tela de login;
+* listagem das carteiras do usuário;
+* detalhes da carteira;
+* proteção de rotas;
+* autenticação integrada ao backend;
+* logout;
+* interface responsiva.
+
+Fluxo simplificado:
 
 ```text
-PortfolioManager.Api
-│
-├── Configuration
-│   └── JwtSettings.cs
-│
-├── Controllers
-│   ├── AssetsController.cs
-│   ├── AuthController.cs
-│   └── PortfoliosController.cs
-│
-├── Data
-│   └── AppDbContext.cs
-│
-├── Dtos
-│   ├── AssetDto.cs
-│   ├── CreateAssetDto.cs
-│   ├── CreatePortfolioDto.cs
-│   ├── LoginRequestDto.cs
-│   ├── LoginResponseDto.cs
-│   ├── PagedResponse.cs
-│   ├── PortfolioDto.cs
-│   ├── RegisterUserDto.cs
-│   ├── UpdateAssetDto.cs
-│   ├── UpdatePortfolioDto.cs
-│   └── UserDto.cs
-│
-├── Mappings
-│   ├── AssetMapper.cs
-│   └── PortfolioMapper.cs
-│
-├── Migrations
-│
-├── Models
-│   ├── Asset.cs
-│   ├── Portfolio.cs
-│   ├── TransactionType.cs
-│   └── User.cs
-│
-├── Services
-│   ├── AssetService.cs
-│   ├── PortfolioService.cs
-│   ├── UserService.cs
-│   └── Interfaces
-│
-└── Program.cs
-
-
-PortfolioManager.Api.Tests
-│
-└── Services
-    └── AssetServiceTests.cs
+Login
+  │
+  ▼
+ASP.NET Core valida as credenciais
+  │
+  ▼
+JWT é criado
+  │
+  ▼
+Cookie HttpOnly
+  │
+  ▼
+Angular acessa endpoints protegidos
 ```
+
+Para verificar uma sessão, o frontend consulta o backend em vez de tentar ler o JWT diretamente.
 
 ---
 
 ## Modelagem do domínio
 
-A modelagem está sendo evoluída para separar:
-
-```text
-Asset
-```
-
-do conceito de:
-
-```text
-InvestmentTransaction
-```
-
-Um `Asset` representa o ativo financeiro em si:
-
-```text
-PETR4
-VALE3
-MXRF11
-```
-
-Enquanto uma operação representa um fato ocorrido na carteira:
-
-```text
-Compra de 10 PETR4
-Preço unitário: R$ 32,50
-Data: 17/08/2026
-```
-
-A direção arquitetural do projeto é:
+A direção da modelagem é:
 
 ```text
 User
@@ -250,76 +324,21 @@ User
               └── Asset
 ```
 
-As **transações serão a fonte de verdade**, enquanto informações como posição e preço médio poderão ser calculadas a partir do histórico de operações.
-
----
-
-## Próximas evoluções
-
-### Em desenvolvimento
-
-* [ ] Entidade `InvestmentTransaction`
-* [ ] Registro de compras
-* [ ] Registro de vendas
-* [ ] Validação de posição para vendas
-* [ ] Histórico de operações
-* [ ] Cálculo de posição
-* [ ] Cálculo de preço médio
-* [ ] Testes das regras financeiras
-
-### Roadmap técnico
-
-Após consolidar o domínio principal da aplicação, o projeto será utilizado para estudar e aplicar gradualmente conceitos de backend distribuído:
-
-* [ ] PostgreSQL
-* [ ] Apache Kafka
-* [ ] Producer e Consumer com .NET
-* [ ] Worker Service / BackgroundService
-* [ ] Processamento assíncrono
-* [ ] Idempotência
-* [ ] Retry
-* [ ] Dead Letter Topic
-* [ ] Outbox Pattern
-* [ ] Docker
-* [ ] Logs estruturados
-* [ ] Métricas e health checks
-* [ ] CI/CD
-* [ ] Cloud
-
-> As tecnologias desta seção representam **roadmap de estudo e evolução** e ainda não fazem parte da versão atual da aplicação.
-
----
-
-## Arquitetura futura para processamento assíncrono
-
-Uma das evoluções planejadas é utilizar eventos de domínio para processamentos que não precisam ocorrer durante a requisição HTTP.
-
-Exemplo:
+Uma transação representa um fato ocorrido na carteira:
 
 ```text
-POST /transactions
-       │
-       ▼
-ASP.NET Core API
-       │
-       ├── valida operação
-       │
-       ├── persiste transação
-       │
-       ▼
-InvestmentTransactionCreated
-       │
-       ▼
-     Kafka
-       │
-       ▼
-.NET Worker
-       │
-       ▼
-Atualização de projeções
+Compra
+PETR4
+Quantidade: 10
+Preço: R$ 32,50
 ```
 
-A intenção não é adicionar complexidade apenas por tecnologia, mas estudar cenários onde processamento assíncrono, desacoplamento e escalabilidade realmente façam sentido.
+A intenção é que o histórico de operações seja a base para informações derivadas como:
+
+* posição atual;
+* preço médio;
+* custo total;
+* valorização.
 
 ---
 
@@ -328,18 +347,23 @@ A intenção não é adicionar complexidade apenas por tecnologia, mas estudar c
 ### Pré-requisitos
 
 * .NET SDK
+* Node.js
+* npm
 * Git
 
 Clone o repositório:
 
 ```bash
 git clone https://github.com/winnie-s3/portfolio-manager-api.git
+cd portfolio-manager-api
 ```
 
-Entre na pasta:
+### Backend
+
+Entre no projeto:
 
 ```bash
-cd portfolio-manager-api
+cd PortfolioManager.Api
 ```
 
 Restaure as dependências:
@@ -348,35 +372,12 @@ Restaure as dependências:
 dotnet restore
 ```
 
----
-
-## Configurando o JWT
-
-Por segurança, a chave utilizada para assinatura do JWT **não é armazenada no repositório**.
-
-Entre na pasta do projeto da API:
-
-```bash
-cd PortfolioManager.Api
-```
-
-Inicialize o User Secrets, caso necessário:
+Configure a chave JWT utilizando User Secrets:
 
 ```bash
 dotnet user-secrets init
+dotnet user-secrets set "Jwt:Key" "SUA_CHAVE_SEGURA"
 ```
-
-Configure uma chave local:
-
-```bash
-dotnet user-secrets set "Jwt:Key" "SUA_CHAVE_SEGURA_COM_PELO_MENOS_32_CARACTERES"
-```
-
----
-
-## Banco de dados
-
-A versão atual utiliza **SQLite**.
 
 Aplique as migrations:
 
@@ -384,19 +385,29 @@ Aplique as migrations:
 dotnet ef database update
 ```
 
-O arquivo local do banco de dados não é versionado no Git.
-
----
-
-## Executando a API
+Execute:
 
 ```bash
 dotnet run
 ```
 
-Após iniciar a aplicação, acesse o Swagger pela URL exibida no terminal.
+A documentação Swagger ficará disponível no endereço exibido pela aplicação.
 
-O Swagger permite visualizar e testar os endpoints disponíveis.
+### Frontend
+
+Em outro terminal:
+
+```bash
+cd PortfolioManager.Web
+npm install
+npm start
+```
+
+O frontend ficará disponível normalmente em:
+
+```text
+http://localhost:4200
+```
 
 ---
 
@@ -408,71 +419,33 @@ Na raiz da solução:
 dotnet test
 ```
 
-Os testes são executados separadamente da API e utilizam banco em memória nos cenários unitários.
-
 ---
 
-## Decisões técnicas
+## Próximas evoluções
 
-### Por que DTOs?
+* [ ] histórico de operações por carteira;
+* [ ] validação de posição disponível em vendas;
+* [ ] cálculo de posição;
+* [ ] cálculo de preço médio;
+* [ ] evolução da modelagem de `Asset`;
+* [ ] ampliação dos testes automatizados;
+* [ ] integração entre preço de mercado e valorização da carteira;
+* [ ] configuração de ambientes e deploy.
 
-Para evitar que as entidades persistidas sejam utilizadas diretamente como contratos HTTP e permitir maior controle sobre entrada e saída de dados.
+### Estudos futuros
 
-### Por que Services?
+Depois da consolidação do domínio principal, o projeto poderá ser usado para explorar:
 
-Para manter regras de negócio fora dos Controllers e melhorar separação de responsabilidades, testabilidade e manutenção.
+* PostgreSQL;
+* Docker;
+* processamento assíncrono;
+* mensageria;
+* retry e resiliência;
+* observabilidade;
+* CI/CD;
+* cloud.
 
-### Por que Dependency Injection?
-
-Para reduzir acoplamento entre componentes e permitir que dependências sejam fornecidas externamente às classes.
-
-### Por que JWT?
-
-Para implementar autenticação stateless nos endpoints da API.
-
-### Por que `decimal` para valores financeiros?
-
-Valores monetários exigem precisão decimal. Tipos binários como `float` e `double` podem introduzir erros de representação inadequados para cálculos financeiros.
-
-### Por que separar Asset de Transaction?
-
-Porque o ativo representa **o que existe no mercado**, enquanto a transação representa **o que aconteceu na carteira do usuário**.
-
-Essa separação permite manter histórico e calcular informações derivadas posteriormente.
-
----
-
-## Segurança
-
-Algumas práticas adotadas:
-
-* senhas armazenadas com hash utilizando BCrypt;
-* autenticação JWT;
-* chave JWT fora do código-fonte;
-* uso de .NET User Secrets no desenvolvimento;
-* arquivos locais de banco excluídos do Git;
-* separação progressiva dos dados por usuário;
-* DTOs para controlar dados expostos pela API.
-
----
-
-## Objetivo de aprendizado
-
-Além da construção da aplicação, este projeto tem como objetivo consolidar conhecimentos relacionados a:
-
-* arquitetura backend;
-* APIs REST;
-* modelagem de domínio;
-* regras financeiras;
-* persistência;
-* autenticação e autorização;
-* testes automatizados;
-* refatoração;
-* qualidade de código;
-* arquitetura orientada a eventos;
-* sistemas distribuídos.
-
-O desenvolvimento é feito de forma incremental, buscando compreender **os motivos e trade-offs por trás das decisões técnicas**, e não apenas adicionar tecnologias ao projeto.
+Esses itens representam **roadmap de estudo** e ainda não fazem parte da implementação atual.
 
 ---
 
@@ -480,7 +453,7 @@ O desenvolvimento é feito de forma incremental, buscando compreender **os motiv
 
 🟡 **Em desenvolvimento**
 
-A fundação da API está implementada e o domínio está sendo evoluído para suportar operações financeiras e cálculos derivados.
+A aplicação já possui um fluxo full stack funcional com autenticação, autorização por usuário, gerenciamento de carteiras, integração externa de preços e início da modelagem de operações financeiras.
 
 ---
 
@@ -488,10 +461,10 @@ A fundação da API está implementada e o domínio está sendo evoluído para s
 
 **Winnie Silva**
 
-Desenvolvedora .NET focada em backend, APIs, sistemas financeiros e evolução contínua em arquitetura de software.
+Desenvolvedora .NET com foco em backend, APIs, sistemas financeiros e evolução contínua em arquitetura de software.
 
 GitHub: [@winnie-s3](https://github.com/winnie-s3)
 
 ---
 
-⭐ Este projeto está sendo desenvolvido continuamente como parte do meu portfólio técnico e aprofundamento em desenvolvimento backend com .NET.
+⭐ Projeto desenvolvido de forma incremental, buscando compreender os motivos e trade-offs por trás das decisões técnicas em vez de apenas adicionar tecnologias.

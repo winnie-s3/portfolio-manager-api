@@ -17,4 +17,15 @@ export class AuthService {
       request
     );
   }
+
+  logout(): Observable<void> {
+    return this.http.post<void>(
+      `${this.apiUrl}/logout`,
+      {}
+    );
+  }
+
+  isAuthenticated(): Observable<unknown> {
+    return this.http.get(`${this.apiUrl}/me`);
+  }
 }

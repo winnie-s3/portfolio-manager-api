@@ -72,10 +72,21 @@ public class AuthController : ControllerBase
         var tokenString =
             new JwtSecurityTokenHandler().WriteToken(token);
 
-        return Ok(new LoginResponseDto
+        Response.Cookies.Append(
+        "access_token",
+        tokenString,
+        new CookieOptions
         {
-            Token = tokenString,
-            ExpiresAt = expiresAt
+            HttpOnly = true,
+            Secure = Request.IsHttps,
+            SameSite = SameSiteMode.Strict,
+            Expires = expiresAt,
+            Path = "/"
+        });
+
+        return Ok(new
+        {
+            expiresAt
         });
     }
 
@@ -89,5 +100,37 @@ public class AuthController : ControllerBase
             return Conflict("Já existe um usuário com esse e-mail.");
 
         return Created(string.Empty, user);
+    }
+
+    [Authorize]
+    [HttpGet("me")]
+    public IActionResult Me()
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var name = User.FindFirst(ClaimTypes.Name)?.Value;
+        var email = User.FindFirst(ClaimTypes.Email)?.Value;
+
+        return Ok(new
+        {
+            id = userId,
+            name,
+            email
+        });
+    }
+
+    [HttpPost("logout")]
+    public IActionResult Logout()
+    {
+        Response.Cookies.Delete(
+            "access_token",
+            new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = Request.IsHttps,
+                SameSite = SameSiteMode.Strict,
+                Path = "/"
+            });
+
+        return NoContent();
     }
 }

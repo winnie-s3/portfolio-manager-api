@@ -21,10 +21,7 @@ export class Login {
       email: this.email,
       password: this.password
     }).subscribe({
-      next: response => {
-        localStorage.setItem('token', response.token);
-        localStorage.setItem('tokenExpiresAt', response.expiresAt);
-
+      next: () => {
         this.router.navigate(['/portfolios']);
       },
 
